@@ -15,7 +15,7 @@ app.use(cors());
 
 // Configure CORS
 app.use(cors({
-  origin: 'http://localhost:5001', // Your frontend URL
+  origin: 'http://localhost:5002', // Your frontend URL
   credentials: true
 }));
 // Connect to MongoDB

@@ -1,66 +1,67 @@
+// projectStorage.js
+
 export const loadProjects = () => {
   return JSON.parse(localStorage.getItem('projects') || '[]');
 };
 
-// Load a single project by ID
 export const loadProject = (projectId) => {
   const projects = loadProjects();
   return projects.find(p => p.id === projectId);
 };
 
-// Save updates to a project
 export const saveProject = (project) => {
   const projects = loadProjects();
   const index = projects.findIndex(p => p.id === project.id);
+  
   if (index >= 0) {
+    // Update existing project
     projects[index] = {
       ...project,
       lastModified: new Date().toISOString()
     };
+  } else {
+    // Add new project
+    projects.push(project);
   }
+  
   localStorage.setItem('projects', JSON.stringify(projects));
 };
 
-export const createNewProject = () => {
-  const defaultProject = {
+export const createNewProject = (name = 'Untitled Project', initialFiles = []) => {
+  const defaultFiles = [
+    { name: 'index', ext: 'html', content: '<!-- Add HTML here -->' },
+    { name: 'style', ext: 'css', content: '/* Add CSS here */' },
+    { name: 'script', ext: 'js', content: '// Add JavaScript here' }
+  ];
+
+  const newProject = {
     id: Date.now().toString(),
-    name: 'Untitled Project',
-    files: [
-      { name: 'index', ext: 'html', content: '<!-- Add HTML here -->' },
-      { name: 'style', ext: 'css', content: '/* Add CSS here */' },
-      { name: 'script', ext: 'js', content: '// Add JavaScript here' }
-    ],
+    name: name.trim() || 'Untitled Project',
+    files: initialFiles.length > 0 ? initialFiles : defaultFiles,
     lastModified: new Date().toISOString()
   };
 
-  const projects = loadProjects();
-  projects.push(defaultProject);
-  localStorage.setItem('projects', JSON.stringify(projects));
-  return defaultProject;
+  saveProject(newProject);
+  return newProject;
 };
 
-// Add a new file to an existing project
 export const addFileToProject = (projectId, fileName) => {
   const projects = loadProjects();
   const project = projects.find(p => p.id === projectId);
-  
-  if (!project) return null;
 
-  if (!fileName.includes('.')) {
-    throw new Error('Filename must include extension');
-  }
+  if (!project) return null;
 
   const [name, ext] = fileName.split('.');
   const newFile = {
-    name,
-    ext,
+    name: name || 'new-file',
+    ext: ext || 'txt',
     content: ext === 'html' ? '<!-- New File -->' :
              ext === 'css'  ? '/* New Styles */' :
-             '// New Script'
+             ext === 'js'   ? '// New Script' :
+             ''
   };
 
   project.files.push(newFile);
-  project.lastModified = new Date().toISOString();
-  localStorage.setItem('projects', JSON.stringify(projects));
+  saveProject(project);
   return newFile;
 };

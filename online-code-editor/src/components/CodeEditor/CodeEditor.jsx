@@ -43,10 +43,10 @@ export default function CodeEditor() {
   // Add new file handler
   const handleAddFile = () => {
     const parts = newFileName.split('.');
-    if (parts.length < 2) {
-      alert('Please include valid file extension (e.g. style.css)');
-      return;
-    }
+    // if (parts.length < 2) {
+    //   alert('Please include valid file extension (e.g. style.css)');
+    //   return;
+    // }
     const ext = parts.pop();
     const name = parts.join('.');
 
@@ -161,7 +161,7 @@ const handleDeleteFile = (index) => {
     value={projectName}
     onChange={e => setProjectName(e.target.value)}
     onBlur={handleRenameProject}
-    onKeyPress={(e) => e.key === 'Enter' && handleRenameProject()}
+    // onKeyPress={(e) => e.key === 'Enter' && handleRenameProject()}
     className="bg-white/5 text-white text-xl font-semibold px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
     aria-label="Project name"
   />
@@ -236,14 +236,14 @@ const handleDeleteFile = (index) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-index 1"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000]"
             onClick={() => setShowAddFileDialog(false)}
           >
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 w-96 border border-gray-700"
+              className="bg-gray-800/90 backdrop-blur-sm rounded-xl p-6 w-96 border border-gray-700 z-[101] relative"
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-white">New File</h2>
@@ -283,7 +283,7 @@ const handleDeleteFile = (index) => {
       </AnimatePresence>
 
       {/* Tabs */}
-      <div className="flex bg-gray-800/50 backdrop-blur-sm p-2 border-b border-gray-700">
+      <div className="flex bg-gray-800/50 backdrop-blur-sm p-2 border-b border-gray-700 z-10">
         {files.map((f, idx) => (
           <motion.button
             key={`${f.name}-${f.ext}-${idx}`}
@@ -313,8 +313,8 @@ const handleDeleteFile = (index) => {
       </div>
 
       {/* Editor & Preview */}
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto">
+      <div className="flex flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-auto  relative z-0" >
           <CodeMirror
             value={files[activeFileIndex]?.content || ''}
             height="100%"
@@ -331,7 +331,7 @@ const handleDeleteFile = (index) => {
               highlightActiveLineGutter: true,
               autocompletion: true
             }}
-            style={{ fontSize: '14px' }}
+            style={{ fontSize: '14px',   zIndex: 0 }}
           />
         </div>
 
@@ -339,7 +339,7 @@ const handleDeleteFile = (index) => {
           <motion.div 
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
-            className="flex-1 bg-white border-l border-gray-700"
+            className="flex-1 bg-white border-l border-gray-700 z-0"
           >
             <LivePreview
               html={files.find(f => f.ext === 'html')?.content || ''}

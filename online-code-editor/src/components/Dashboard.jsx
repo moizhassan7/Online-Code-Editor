@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiFile, FiFolder, FiAlertCircle, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiFile, FiFolder, FiAlertCircle } from 'react-icons/fi';
 import ProjectCard from './ProjectCard';
 import { loadProjects,createNewProject } from '../utils/projectStorage';
 
@@ -27,23 +27,45 @@ export default function Dashboard() {
       return;
     }
     setError('');
+    setProjectName(projectName)
     setShowProjDialog(false);
     setShowFileDialog(true);
   };
 
   const handleCreateFile = () => {
-    if (!fileName.includes('.')) {
-      setError('Please include an extension (e.g. "index.html")');
-      return;
+  if (!fileName.includes('.')) {
+    setError('Please include an extension (e.g. "index.html")');
+    return;
+  }
+
+  // Split filename into name and extension
+  const [fileBaseName, fileExtension] = fileName.split('.');
+  
+  if (!fileExtension) {
+    setError('Invalid file extension');
+    return;
+  }
+
+  // Create initial file content based on extension
+  const initialContent = {
+    html: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Document</title>\n</head>\n<body>\n\n</body>\n</html>',
+    css: 'body {\n    margin: 0;\n    padding: 0;\n}',
+    js: '// JavaScript code here'
+  }[fileExtension] || '';
+
+  const newProject = createNewProject(projectName.trim(), [
+    {
+      name: fileBaseName || 'index',
+      ext: fileExtension,
+      content: initialContent
     }
-    setError('');
-    const fullName = `${projectName.trim()}_${fileName.trim()}`;
-    const newProject = createNewProject(fullName);
-    setProjectName('');
-    setFileName('');
-    setShowFileDialog(false);
-    navigate(`/editor/${newProject.id}`);
-  };
+  ]);
+
+  setProjectName('');
+  setFileName('');
+  setShowFileDialog(false);
+  navigate(`/editor/${newProject.id}`);
+};
 
   const handleDeleteProject = (projectId) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
@@ -93,16 +115,16 @@ export default function Dashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-[1000]"
               onClick={() => setShowProjDialog(false)}
             >
               <motion.div
                 initial={{ y: 20 }}
                 animate={{ y: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+                className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl z-[1001]"
               >
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-3 mb-6 z-[102]">
                   <div className="p-2 bg-indigo-100 rounded-lg">
                     <FiFolder className="text-indigo-600 text-xl" />
                   </div>
@@ -149,14 +171,14 @@ export default function Dashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-[1000]"
               onClick={() => setShowFileDialog(false)}
             >
               <motion.div
                 initial={{ y: 20 }}
                 animate={{ y: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+                className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl z-[1001]"
               >
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 bg-cyan-100 rounded-lg">
@@ -214,7 +236,7 @@ export default function Dashboard() {
         ) : (
           <motion.div
             layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 z-0 relative"
           >
             <AnimatePresence>
               {projects.map(p => (

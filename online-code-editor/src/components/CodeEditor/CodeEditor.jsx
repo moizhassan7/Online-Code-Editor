@@ -6,7 +6,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
 import { dracula } from '@uiw/codemirror-theme-dracula';
-import { FiDownload, FiCode, FiX, FiEye, FiFile, FiFolderPlus,FiMessageCircle } from 'react-icons/fi';
+import { FiDownload, FiCode, FiX, FiEye, FiFile, FiFolderPlus,FiMessageCircle, FiAlertCircle } from 'react-icons/fi';
 import { TbZip } from 'react-icons/tb';
 import LivePreview from './LivePreview';
 import JSZip from 'jszip';
@@ -27,6 +27,7 @@ export default function CodeEditor() {
   const [projectName, setProjectName] = useState('');
   const [showPreview, setShowPreview] = useState(true);
   const [collaborators, setCollaborators] = useState({});
+    const [addFileError, setAddFileError] = useState(''); 
   const {user} = useAuth();
   const socketRef = useRef(null);
   const [showChat, setShowChat] = useState(false);
@@ -46,15 +47,29 @@ export default function CodeEditor() {
     setProjectName(existing.name);
   }, [projectId, navigate]);
 
+
   // Add new file handler
   const handleAddFile = () => {
+    setAddFileError(''); // Reset error
+    
     const parts = newFileName.split('.');
-    // if (parts.length < 2) {
-    //   alert('Please include valid file extension (e.g. style.css)');
-    //   return;
-    // }
+    if (parts.length < 2) {
+      setAddFileError('Please include valid file extension (e.g. style.css)');
+      return;
+    }
+    
     const ext = parts.pop();
     const name = parts.join('.');
+    
+    // Check for duplicate file
+    const fileExists = files.some(
+      file => file.name === name && file.ext === ext
+    );
+    
+    if (fileExists) {
+      setAddFileError('A file with this name already exists in the project');
+      return;
+    }
 
     const newFile = {
       name,
@@ -301,7 +316,7 @@ useEffect(() => {
       </div>
 
       {/* Add File Dialog */}
-      <AnimatePresence>
+       <AnimatePresence>
         {showAddFileDialog && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -331,8 +346,19 @@ useEffect(() => {
                 placeholder="filename.html"
                 className="w-full px-4 py-3 bg-white/5 text-white rounded-lg focus:ring-2 focus:ring-indigo-500 border border-gray-700"
                 value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
+                onChange={(e) => {
+                  setNewFileName(e.target.value);
+                  setAddFileError(''); // Clear error when typing
+                }}
               />
+              
+              {/* Error message display */}
+              {addFileError && (
+                <div className="mt-2 flex items-center text-red-400">
+                  <FiAlertCircle className="mr-2" />
+                  {addFileError}
+                </div>
+              )}
 
               <div className="flex justify-end gap-3 mt-6">
                 <button
@@ -352,6 +378,7 @@ useEffect(() => {
           </motion.div>
         )}
       </AnimatePresence>
+
 
       {/* Tabs */}
       <div className="flex bg-gray-800/50 backdrop-blur-sm p-2 border-b border-gray-700 z-10">

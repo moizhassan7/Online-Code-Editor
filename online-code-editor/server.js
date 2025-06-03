@@ -51,6 +51,8 @@ const authMiddleware = async (req, res, next) => {
 };
 
 // Routes
+// /api/auth/signup
+//Registers a new user in the database.
 app.post('/api/auth/signup', async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -84,7 +86,8 @@ app.post('/api/auth/signup', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
+///api/auth/login
+// Verifies the provided user credentials (email and password).
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -108,7 +111,8 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
+///api/auth/me
+//Retrieves and returns the information of the currently logged-in user.
 app.get('/api/auth/me', authMiddleware, (req, res) => {
   res.json(req.user);
 });

@@ -22,15 +22,29 @@ export default function Dashboard() {
   }, []);
 
   const handleCreateProject = () => {
-    if (!projectName.trim()) {
+    const trimmedName = projectName.trim();
+    if (!trimmedName) {
       setError('Please enter a project name');
       return;
     }
+
+    // Check for duplicate project name
+    const existingProjects = loadProjects();
+    const nameExists = existingProjects.some(
+      p => p.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+
+    if (nameExists) {
+      setError('A project with this name already exists');
+      return;
+    }
+
     setError('');
-    setProjectName(projectName)
+    setProjectName(trimmedName);
     setShowProjDialog(false);
     setShowFileDialog(true);
   };
+
 
   const handleCreateFile = () => {
   if (!fileName.includes('.')) {
